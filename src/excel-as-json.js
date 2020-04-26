@@ -51,33 +51,55 @@ const parseKeyName = function (key) {
   }
 };
 
+const convertValueExplicit = function (value, type) {
+  let res = value;
+  switch (type) {
+    case "number": {
+      res = Number(value);
+      if(Number.isNaN(res)) {
+        throw `Cannot convert "${value}" to number`
+      }
+      break;
+    }
+    case "boolean": {
+      res = BOOLVALS[value.toLowerCase()];
+      break;
+    }
+  }
+  return res;
+}
+
 // Convert a list of values to a list of more native forms
-const convertValueList = (list, options) => Array.from(list).map((item) => convertValue(item, options));
+const convertValueList = (list, options, column) => Array.from(list).map((item) => convertValue(item, options, column));
 
 // Convert values to native types
 // Note: all values from the excel module are text
-var convertValue = function (value, options) {
-  // isFinite returns true for empty or blank strings, check for those first
-  if ((value.length === 0) || !/\S/.test(value)) {
-    return value;
-  } else if (isFinite(value)) {
-    if (options.convertTextToNumber) {
-      return Number(value);
-    } else {
-      return value;
-    }
+var convertValue = function (value, options, column) {
+  if (options.columnMapping && options.columnMapping[column] && options.columnMapping[column].type) {
+    return convertValueExplicit(value, options.columnMapping[column].type)
   } else {
-    const testVal = value.toLowerCase();
-    if (Array.from(BOOLTEXT).includes(testVal)) {
-      return BOOLVALS[testVal];
-    } else {
+    // isFinite returns true for empty or blank strings, check for those first
+    if ((value.length === 0) || !/\S/.test(value)) {
       return value;
+    } else if (isFinite(value)) {
+      if (options.convertTextToNumber) {
+        return Number(value);
+      } else {
+        return value;
+      }
+    } else {
+      const testVal = value.toLowerCase();
+      if (Array.from(BOOLTEXT).includes(testVal)) {
+        return BOOLVALS[testVal];
+      } else {
+        return value;
+      }
     }
   }
 };
 
 // Assign a value to a dotted property key - set values on sub-objects
-var assign = function (obj, key, value, options) {
+var assign = function (obj, key, value, options, column) {
   // On first call, a key is a string. Recursed calls, a key is an array
   let i;
   if (typeof key !== 'object') {
@@ -107,12 +129,12 @@ var assign = function (obj, key, value, options) {
           return result;
         })());
       }
-      return assign(obj[keyName][index], key, value, options);
+      return assign(obj[keyName][index], key, value, options, column);
     } else {
       if (obj[keyName] == null) {
         obj[keyName] = {};
       }
-      return assign(obj[keyName], key, value, options);
+      return assign(obj[keyName], key, value, options, column);
     }
   } else {
     if (keyIsList && (index != null)) {
@@ -122,13 +144,13 @@ var assign = function (obj, key, value, options) {
     }
     if (keyIsList && (index == null)) {
       if (value != null && value !== '') {
-        return obj[keyName] = convertValueList(value.split(';'), options);
+        return obj[keyName] = convertValueList(value.split(';'), options, column);
       } else if (!options.omitEmptyFields) {
         return obj[keyName] = [];
       }
     } else {
       if (!(options.omitEmptyFields && (value === ''))) {
-        return obj[keyName] = convertValue(value, options);
+        return obj[keyName] = convertValue(value, options, column);
       }
     }
   }
@@ -146,14 +168,24 @@ const convert = function (data, options) {
   }
 
   const keys = data[0];
+  let mappedKeys = keys;
   const rows = data.slice(1);
+
+  if (options.columnMapping) {
+    mappedKeys = keys.map(key => {
+      if (options.columnMapping[key] && options.columnMapping[key].mapping) {
+        return options.columnMapping[key].mapping;
+      }
+      return key;
+    })
+  }
 
   const result = [];
   for (let row of Array.from(rows)) {
     const item = {};
     for (let index = 0; index < row.length; index++) {
       const value = row[index];
-      assign(item, keys[index], value, options);
+      assign(item, mappedKeys[index], value, options, keys[index]);
     }
     result.push(item);
   }
@@ -162,7 +194,7 @@ const convert = function (data, options) {
 
 const processRow = function (row, options) {
   let values = [];
-  row.eachCell({ includeEmpty: true }, (cell) => {
+  row.eachCell({includeEmpty: true}, (cell) => {
     let res
     let value = cell.value;
     if (value != null && value.formula) {
@@ -213,6 +245,15 @@ const write = function (data, dst, callback) {
 //   omitEmptyFields:    boolean: false: do not include keys with empty values in json output. empty values are stored as ''
 //                                       TODO: this is probably better named omitKeysWithEmptyValues
 //   convertTextToNumber boolean: true;  if text looks like a number, convert it to a number
+//   columnMapping:     columnMappingShape  defines custom mapping of columns
+//
+//   const columnMappingShape = map(
+//       string(),   //column header
+//       shape({
+//         mapping: string(),   //mapping according to excel-as-json possibilities
+//         type: oneOf(["string", "number", "boolean"])   //type of column value
+//       })
+//   );
 //
 // convertExcel(src, dst) <br/>
 //   will write a row oriented xlsx sheet 1 to `dst` as JSON with no notification
@@ -293,15 +334,15 @@ const processFile = function (src, dst, options, callback) {
     }
     readPromise.catch((err) => callback(`Error reading ${src}: ${err}`))
     .then(() => {
-      let sheet = Number(options.sheet)-1;
+      let sheet = Number(options.sheet) - 1;
       let ws;
       if (src.endsWith(".xlsx")) {
         ws = wb.worksheets.filter(s => s.orderNo === sheet)[0];
-      }else{
-        ws= wb.getWorksheet();
+      } else {
+        ws = wb.getWorksheet();
       }
       if (!ws) {
-        callback(`No sheet found for ${sheet} possible sheets ${wb.worksheets.map((ws) => `${ws.name}:${ws.orderNo+1}`).join(",")}`)
+        callback(`No sheet found for ${sheet} possible sheets ${wb.worksheets.map((ws) => `${ws.name}:${ws.orderNo + 1}`).join(",")}`)
       }
       const result = convertWorksheet(ws, options);
       if (dst) {
@@ -326,6 +367,7 @@ exports.processFile = processFile;
 // Exposing remaining functionality for unexpected use cases, testing, etc.
 exports.assign = assign;
 exports.convert = convert;
+exports.convertValue = convertValue;
 exports.convertValue = convertValue;
 exports.parseKeyName = parseKeyName;
 exports._validateOptions = _validateOptions;

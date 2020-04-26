@@ -11,8 +11,9 @@
 
 # Difference from excel-as-json
 
-- No change in API.
+- No change in existing API.
 - Use ExcelJS internally(no native library compilation, support for large files and better performance)
+- Support column mapping
 
 
 # Convert Excel Files to JSON
@@ -43,7 +44,17 @@ convertExcel(src, dst, options, callback);
     * sheet: 1 based sheet index as text - default '1' 
     * isColOriented: are object values in columns with keys in column A - default false
     * omitEmptyFields: omit empty Excel fields from JSON output - default false
-    * convertTextToNumber: if text looks like a number, convert it to a number - default true
+    * convertTextToNumber: if text looks like a number, convert it to a number - default true, this is not used if columnMapping is specified
+    * columnMapping:     columnMappingShape  defines custom mapping of columns
+    ```js
+       const columnMappingShape = map(
+           string(),   //column header
+           shape({
+             mapping: string(),   //mapping according to excel-as-json possibilities (foo.bar, foo.foo[], etc)
+             type: oneOf(["string", "number", "boolean"])   //type of column value. Default type is string
+           })
+       );
+    ```  
 * callback(err, data): callback for completion notification
 
 **NOTE** If options are not specified, defaults are used.

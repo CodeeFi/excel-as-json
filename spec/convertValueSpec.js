@@ -22,6 +22,17 @@ const OPTIONS = {
   convertTextToNumber: true
 };
 
+const MAPPING_OPTIONS = {
+  sheet: '1',
+  isColOriented: false,
+  omitEmptyFields: false,
+  omitKeysWithEmptyValues: false,
+  columnMapping: {
+    numberValue: {type: "number"},
+    booleanValue: {type: "boolean"}
+  }
+};
+
 
 describe('convert value', function() {
 
@@ -80,4 +91,35 @@ describe('convert value', function() {
     convertValue(956, o).should.be.a('number').and.equal(956);
     return convertValue(0x4aa, o).should.be.a('number').and.equal(1194);
   });
+
 });
+
+describe('convert value mapping', function() {
+  it('should convert to integers', function() {
+    convertValue('1000', MAPPING_OPTIONS, "numberValue").should.be.a('number').and.equal(1000);
+    return convertValue('-999', MAPPING_OPTIONS, "numberValue").should.be.a('number').and.equal(-999);
+  });
+
+
+  it('should convert text floats to literal numbers', function() {
+    convertValue('999.0', MAPPING_OPTIONS, "numberValue").should.be.a('number').and.equal(999.0);
+    return convertValue('-100.0', MAPPING_OPTIONS, "numberValue").should.be.a('number').and.equal(-100.0);
+  });
+
+
+  it('should convert text exponential numbers to literal numbers', () => convertValue('2e32', MAPPING_OPTIONS, "numberValue").should.be.a('number').and.equal(2e+32));
+
+
+  it('should not convert things that are not numbers', () => expect(() => convertValue('test', MAPPING_OPTIONS, "numberValue")).to.throw("Cannot convert \"test\" to number"));
+
+  it('should convert true and false to Boolean', function() {
+    convertValue('true', MAPPING_OPTIONS, "booleanValue").should.be.a('boolean').and.equal(true);
+    convertValue('TRUE', MAPPING_OPTIONS, "booleanValue").should.be.a('boolean').and.equal(true);
+    convertValue('TrUe', MAPPING_OPTIONS, "booleanValue").should.be.a('boolean').and.equal(true);
+    convertValue('false', MAPPING_OPTIONS, "booleanValue").should.be.a('boolean').and.equal(false);
+    convertValue('FALSE', MAPPING_OPTIONS, "booleanValue").should.be.a('boolean').and.equal(false);
+    return convertValue('fAlSe', MAPPING_OPTIONS,"booleanValue").should.be.a('boolean').and.equal(false);
+  });
+
+});
+
