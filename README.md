@@ -5,7 +5,7 @@
 
 <br>
 [![npm:](https://img.shields.io/npm/v/excel-as-json2.svg)](https://www.npmjs.com/package/excel-as-json2)
-[![dependencies:?](https://img.shields.io/david/jiridudekusy/excel-as-json.svg)](https://david-dm.org/jiridudekusy/excel-as-json.svg)
+[![dependencies:?](https://img.shields.io/david/jiridudekusy/excel-as-json)](https://david-dm.org/jiridudekusy/excel-as-json.svg)
 [![devDependency Status](https://david-dm.org/jiridudekusy/excel-as-json/dev-status.svg)](https://david-dm.org/jiridudekusy/excel-as-json#info=devDependencies)
 
 # Difference from excel-as-json
