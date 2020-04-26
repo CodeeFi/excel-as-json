@@ -5,5 +5,5 @@ build
 lib
 test
 coverage
-/.nyc_output/
+.nyc_output/
 *.tgz

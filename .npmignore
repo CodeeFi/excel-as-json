@@ -1,10 +1,13 @@
 .idea
 .gitignore
+.nyc_output
+.travis.yml
 src
 build
+*.tgz
 coverage
 data
 spec
-Gruntfile.coffee
-tools/build.sh
-tools/coffee-coverage-loader.js
+
+tools
+
