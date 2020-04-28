@@ -45,6 +45,7 @@ convertExcel(src, dst, options, callback);
     * isColOriented: are object values in columns with keys in column A - default false
     * omitEmptyFields: omit empty Excel fields from JSON output - default false
     * convertTextToNumber: if text looks like a number, convert it to a number - default true
+    * trimValues: trim all trailing spaces - default false
     * columnMapping:     columnMappingShape  defines custom mapping of columns
     ```js
        const columnMappingShape = map(

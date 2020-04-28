@@ -1,6 +1,6 @@
 {
   "name": "excel-as-json2",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "Convert Excel data to JSON",
   "author": "Steve Tarver <steve.tarver@gmail.com>",
   "license": "MIT",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stevetarver/excel-as-json.git"
+    "url": "git+https://github.com/jiridudekusy/excel-as-json.git"
   },
   "keywords": [
     "Excel",
@@ -24,9 +24,9 @@
     "convert"
   ],
   "bugs": {
-    "url": "https://github.com/stevetarver/excel-as-json/issues"
+    "url": "https://github.com/jiridudekusy/excel-as-json/issues"
   },
-  "homepage": "https://github.com/stevetarver/excel-as-json",
+  "homepage": "https://github.com/jiridudekusy/excel-as-json",
   "dependencies": {
     "exceljs": "^3.9.0"
   },

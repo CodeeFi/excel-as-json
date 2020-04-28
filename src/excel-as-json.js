@@ -206,6 +206,9 @@ const processRow = function (row, options) {
       res = "";
     }
     res = res.toString();
+    if(options.trimValues){
+      res = res.trimEnd();
+    }
     values.push(res);
   });
   return values;
@@ -245,7 +248,8 @@ const write = function (data, dst, callback) {
 //   omitEmptyFields:    boolean: false: do not include keys with empty values in json output. empty values are stored as ''
 //                                       TODO: this is probably better named omitKeysWithEmptyValues
 //   convertTextToNumber boolean: true;  if text looks like a number, convert it to a number
-//   columnMapping:     columnMappingShape  defines custom mapping of columns
+//   trimValues          boolean; true;  trim all trailing spaces (default false)
+//   columnMapping:      columnMappingShape  defines custom mapping of columns
 //
 //   const columnMappingShape = map(
 //       string(),   //column header
