@@ -60,6 +60,12 @@ describe('process file', function() {
     return done();
   }));
 
+  it('should process csv file with custom delimiter', done => processFile('data/semicolon-delimiter.csv', null, {csvDelimiter: ";"}, function(err, data) {
+    expect(err).to.be.an('undefined');
+    JSON.stringify(data).should.equal(ROW_SHEET_1_JSON);
+    return done();
+  }));
+
 
   // NOTE: current excel package impl simply times out if sheet index is OOR
 //  it 'should show error on invalid sheet id', (done) ->

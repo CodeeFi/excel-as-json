@@ -10,12 +10,12 @@
 // Create a list of json objects; 1 object per excel sheet row
 //
 // Assume: Excel spreadsheet is a rectangle of data, where the first row is
-// object keys and remaining rows are object values and the desired json 
+// object keys and remaining rows are object values and the desired json
 // is a list of objects. Alternatively, data may be column oriented with
 // col 0 containing key names.
 //
-// Dotted notation: Key row (0) containing firstName, lastName, address.street, 
-// address.city, address.state, address.zip would produce, per row, a doc with 
+// Dotted notation: Key row (0) containing firstName, lastName, address.street,
+// address.city, address.state, address.zip would produce, per row, a doc with
 // first and last names and an embedded doc named address, with the address.
 //
 // Arrays: may be indexed (phones[0].number) or flat (aliases[]). Indexed
@@ -246,7 +246,7 @@ const write = function (data, dst, callback) {
 //   sheet:              string;  1:     numeric, 1-based index of target sheet
 //   isColOriented:      boolean: false; are objects stored in excel columns; key names in col A
 //   omitEmptyFields:    boolean: false: do not include keys with empty values in json output. empty values are stored as ''
-//                                       TODO: this is probably better named omitKeysWithEmptyValues
+//   csvDelimiter:       string: ","; delimiter used to parse csv files
 //   convertTextToNumber boolean: true;  if text looks like a number, convert it to a number
 //   trimValues          boolean; true;  trim all trailing spaces (default false)
 //   columnMapping:      columnMappingShape  defines custom mapping of columns
@@ -334,7 +334,11 @@ const processFile = function (src, dst, options, callback) {
     if (src.endsWith(".xlsx")) {
       readPromise = wb.xlsx.readFile(src);
     } else if (src.endsWith(".csv")) {
-      readPromise = wb.csv.readFile(src);
+      let parserOptions = {};
+      if(options.csvDelimiter){
+        parserOptions.parserOptions =  {delimiter: options.csvDelimiter};
+      }
+      readPromise = wb.csv.readFile(src, parserOptions);
     }
     readPromise.catch((err) => callback(`Error reading ${src}: ${err}`))
     .then(() => {

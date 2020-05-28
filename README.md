@@ -11,10 +11,11 @@
 
 # Difference from excel-as-json
 
-- No change in existing API.
+- No change in existing API
 - Use ExcelJS internally(no native library compilation, support for large files and better performance)
 - Support column mapping
-
+- Support for value trim
+- Add support for custom csv delimiter
 
 # Convert Excel Files to JSON
 
@@ -46,6 +47,7 @@ convertExcel(src, dst, options, callback);
     * omitEmptyFields: omit empty Excel fields from JSON output - default false
     * convertTextToNumber: if text looks like a number, convert it to a number - default true
     * trimValues: trim all trailing spaces - default false
+    * csvDelimiter: use custom csv delimiter
     * columnMapping:     columnMappingShape  defines custom mapping of columns
     ```js
        const columnMappingShape = map(
