@@ -180,6 +180,33 @@ describe('convert', function() {
     return result[0].should.have.property('c', '02e64');
   });
 
+  it('should apply post-processor', function() {
+    const options = {
+      postProcess: (item) => {
+        item.a = 10;
+        return item;
+      }
+    };
+    const data = [['a', 'b'], [1, 2]];
+    const result = convert(data, options);
+    result[0].should.have.property('a', 10);
+    return result[0].should.have.property('b', 2);
+  });
+
+  it('should remove null values', function() {
+    const options = { postProcess: (_) => null };
+    const data = [['a', 'b'], [1, 2]];
+    const result = convert(data, options);
+    return result.length.should.equal(0);
+  });
+
+  it('should apply column mapping', function() {
+    const options = { columnMapping: { a: { mapping: 'c' } } };
+    const data = [['a', 'b'], [1, 2]];
+    const result = convert(data, options);
+    result[0].should.have.property('c', 1);
+    return result[0].should.have.property('b', 2);
+  });
 
   return it('should not convert numbers to text when convertTextToNumber = false', function() {
     const o =

@@ -1,6 +1,6 @@
 {
   "name": "excel-as-json2",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Convert Excel data to JSON",
   "author": "Steve Tarver <steve.tarver@gmail.com>",
   "license": "MIT",

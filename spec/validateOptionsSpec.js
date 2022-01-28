@@ -95,7 +95,7 @@ describe('validate options', function() {
 
   return it('should detect invalid sheet ids and replace with the default', function(done) {
     const o = {
-      sheet: 'one',
+      sheet: '-1',
       isColOriented: false,
       omitEmptyFields: true
     };

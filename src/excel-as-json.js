@@ -182,12 +182,17 @@ const convert = function (data, options) {
 
   const result = [];
   for (let row of Array.from(rows)) {
-    const item = {};
+    let item = {};
     for (let index = 0; index < row.length; index++) {
       const value = row[index];
       assign(item, mappedKeys[index], value, options, keys[index]);
     }
-    result.push(item);
+    if (options.postProcess) {
+      item = options.postProcess(item);
+    }
+    if (item) { // Discard null or undefined items
+      result.push(item);
+    }
   }
   return result;
 };
@@ -291,6 +296,8 @@ const _validateOptions = function (options) {
           // could be 3 or '3'; force to be '3'
           options.sheet = Number(options.sheet);
         }
+      } else if (typeof options.sheet === "string") {
+        // Leave it as is, we assume sheet name
       } else {
         // something bizarre like true, [Function: isNaN], etc
         options.sheet = 1;
@@ -308,6 +315,10 @@ const _validateOptions = function (options) {
   }
   return options;
 };
+
+const _isExcel = function(fileName) {
+  return fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm"); // Excel file can end with either xlsx or xlsm (Excel with macros) 
+}
 
 const processFile = function (src, dst, options, callback) {
   if (options == null) {
@@ -331,7 +342,7 @@ const processFile = function (src, dst, options, callback) {
   } else {
     const wb = new ExcelJS.Workbook();
     let readPromise;
-    if (src.endsWith(".xlsx")) {
+    if (_isExcel(src)) {
       readPromise = wb.xlsx.readFile(src);
     } else if (src.endsWith(".csv")) {
       let parserOptions = {};
@@ -342,15 +353,15 @@ const processFile = function (src, dst, options, callback) {
     }
     readPromise.catch((err) => callback(`Error reading ${src}: ${err}`))
     .then(() => {
-      let sheet = Number(options.sheet) - 1;
       let ws;
-      if (src.endsWith(".xlsx")) {
-        ws = wb.worksheets.filter(s => s.orderNo === sheet)[0];
+      if (_isExcel(src)) {
+        // Find sheet by number (starting from 1) or by name
+        ws = wb.worksheets.filter(s => s.orderNo + 1 === options.sheet || s.name === options.sheet)[0];
       } else {
         ws = wb.getWorksheet();
       }
       if (!ws) {
-        callback(`No sheet found for ${sheet} possible sheets ${wb.worksheets.map((ws) => `${ws.name}:${ws.orderNo + 1}`).join(",")}`)
+        callback(`No sheet found for ${options.sheet}, possible sheets are ${wb.worksheets.map((ws) => `${ws.name}:${ws.orderNo + 1}`).join(",")}`)
       }
       const result = convertWorksheet(ws, options);
       if (dst) {

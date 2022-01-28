@@ -13,9 +13,10 @@
 
 - No change in existing API
 - Use ExcelJS internally(no native library compilation, support for large files and better performance)
-- Support column mapping
+- Support column mapping including custom post-processor
 - Support for value trim
 - Add support for custom csv delimiter
+- Support for specifying sheet using name
 
 # Convert Excel Files to JSON
 
@@ -42,12 +43,15 @@ convertExcel(src, dst, options, callback);
 * src: path to source Excel file (xlsx only)
 * dst: path to destination JSON file. If null, simply return the parsed object tree
 * options: an object containing 
-    * sheet: 1 based sheet index as text - default '1' 
+    * sheet: 1 based sheet index as text (default '1') or sheet name 
     * isColOriented: are object values in columns with keys in column A - default false
     * omitEmptyFields: omit empty Excel fields from JSON output - default false
     * convertTextToNumber: if text looks like a number, convert it to a number - default true
     * trimValues: trim all trailing spaces - default false
     * csvDelimiter: use custom csv delimiter
+    * postProcess: function to post-process a single row. 
+      It accepts a single argument with the object created from a row and returns a modified object. 
+      If the function returns null or undefined, the whole row is ignored. 
     * columnMapping:     columnMappingShape  defines custom mapping of columns
     ```js
        const columnMappingShape = map(
@@ -378,27 +382,11 @@ You are always free to fork this repo and create your own version to do with as 
 
 ## Change History
 
-### 2.0.2
+### 0.4.0
+- add support for specifying sheet using name
+- add support custom post-processor
 
-- Fix #23 Embedded arrays contain empty string. Flaw in code inserted empty string when no text values were provided for a key like `aliases[]`.
-- Fix #30 not able to force numbers as strings. Added option `convertTextToNumber` defaulting to `true`. If set to false, cells containing text that looks like a number are not converted to a numeric type.
-
-
-### 2.0.1
-- Fix creating missing destination directories to complete prior to writing file
-
-
-### 2.0.0
-
-- **Breaking changes to most function signatures**
-- Replace single option `isColOriented` with an options object to try to stabilize the processFile signature allowing future non-breaking feature additions.
-- Add `sheet` option to specify a 1-based index into the Excel sheet collection - all of your data in a single Excel workbook.
-- Add `omitEmptyFields` option that removes an object key-value if the corresponding Excel cell is empty.
-
-
-### 1.0.0
-
-- Changed process() to processFile() to avoid name collision with node's process object
-- Automatically convert text numbers and booleans to native values
-- Create destination directory if it does not exist
-
+### 0.3.0
+- Support column mapping
+- Support for value trim
+- Add support for custom csv delimiter
