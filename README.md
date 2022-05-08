@@ -86,7 +86,7 @@ convertExcel = require('excel-as-json').processFile
 options = 
     sheet:'1'
     isColOriented: false
-    omitEmtpyFields: false
+    omitEmptyFields: false
 
 convertExcel 'row.xlsx', 'row.json', options, (err, data) ->
 	if err then console.log "JSON conversion failure: #{err}"
